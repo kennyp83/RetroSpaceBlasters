@@ -1,0 +1,30 @@
+# Compiled Object files
+*.o
+*.obj
+
+# Executables and Libraries
+*.exe
+*.out
+*.app
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+
+# Build and Output directories
+bin/
+build/
+out/
+Debug/
+Release/
+
+# OS and IDE garbage
+.DS_Store
+Thumbs.db
+.vscode/
+*.log
+
+# Linux core dumps (crucial for lab PCs)
+core
+core.*
