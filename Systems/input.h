@@ -10,4 +10,6 @@ struct InputState {
 
 extern InputState inputState;
 
+void enableRawInput();
+void disableRawInput();
 void input();

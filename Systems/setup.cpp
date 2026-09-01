@@ -1,5 +1,6 @@
 #include "setup.h"
 #include "render.h"
+#include "input.h"
 #include <iostream>
 
 #ifdef _WIN32
@@ -27,6 +28,7 @@ bool setup()
     system("cls");
 #else
     system("clear");
+    enableRawInput();
 #endif
     hideCursor();
     gameOver = false;
