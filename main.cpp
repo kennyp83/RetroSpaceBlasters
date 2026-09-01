@@ -2,7 +2,7 @@
 #include "Systems/setup.h"
 #include "Systems/input.h"
 #include "Systems/movement.h"
-#include <windows.h>
+
 extern bool gameOver;
 bool setup();
 

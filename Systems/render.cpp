@@ -1,7 +1,11 @@
 #include "render.h"
 #include "movement.h"
 #include <iostream>
+
+#ifdef _WIN32
 #include <windows.h>
+#endif
+
 using namespace std;
 
 const int length = 100;
@@ -9,14 +13,26 @@ const int width = 100;
 
 // Sets cursor position for drawing elements
 void setCursorPos(int x, int y){
+#ifdef _WIN32
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     COORD pos = {(short)x, (short)y};
     SetConsoleCursorPosition(hConsole, pos);
+#else
+    std::cout << "\033[" << (y + 1) << ";" << (x + 1) << "H" << std::flush;
+#endif
 }
 
 void setColor(int colorCode){
+#ifdef _WIN32
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hConsole, colorCode);
+#else
+    if (colorCode == 11) {
+        std::cout << "\033[36m";
+    } else {
+        std::cout << "\033[0m";
+    }
+#endif
 }
 
 void renderBorder(int width, int height)
