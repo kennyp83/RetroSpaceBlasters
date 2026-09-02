@@ -38,67 +38,23 @@ void movePlayer()
     prevPlayerX = playerX;
     prevPlayerY = playerY;
 
-    if (inputState.up && inputState.left)
+    if (inputState.up)
     {
-        playerIcon = '/';
-        playerDX = -1;
-        playerDY = -1;
-        playerX--;
         playerY--;
     }
-    else if (inputState.up && inputState.right)
+    if (inputState.down)
     {
-        playerIcon = '\\';
-        playerDX = 1;
-        playerDY = -1;
-        playerX++;
-        playerY--;
-    }
-    else if (inputState.down && inputState.right)
-    {
-        playerIcon = '/';
-        playerDX = 1;
-        playerDY = 1;
-        playerX++;
         playerY++;
     }
-    else if (inputState.down && inputState.left)
+    if (inputState.left)
     {
-        playerIcon = '\\';
-        playerDX = -1;
-        playerDY = 1;
-        playerX--;
-        playerY++;
-    }
-    else if (inputState.up)
-    {
-        playerIcon = '^';
-        playerDX = 0;
-        playerDY = -1;
-        playerY--;
-    }
-    else if (inputState.down)
-    {
-        playerIcon = 'v';
-        playerDX = 0;
-        playerDY = 1;
-        playerY++;
-    }
-    else if (inputState.left)
-    {
-        playerIcon = '<';
-        playerDX = -1;
-        playerDY = 0;
         playerX--;
     }
-    else if (inputState.right)
+    if (inputState.right && playerX < maxX/4)
     {
-        playerIcon = '>';
-        playerDX = 1;
-        playerDY = 0;
         playerX++;
     }
-    else if (inputState.shoot)
+    if (inputState.shoot)
     {
         fireBullet();
     }
@@ -114,10 +70,10 @@ void fireBullet()
     if(bulletActive){
         return;
     }
-
+    std::cout << "\a" << std::flush;
     bulletActive = true;
     int bulletDistance = 10;
-
+    std::cout << "\a" << std::flush;
     for (int i = 0; i <= bulletDistance; i++)
     {
         if(((playerX + playerDX * i) >= maxX) || (playerY + playerDY * i) >= maxY){
