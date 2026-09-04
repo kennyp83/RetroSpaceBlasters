@@ -15,6 +15,7 @@ int playerY = 7;
 int prevPlayerX = 50;
 int prevPlayerY = 7;
 char playerIcon = '>';
+char enemyIcon = 'X';
 
 int playerDX = 1;
 int playerDY = 0;

@@ -1,6 +1,7 @@
 #include "render.h"
 #include "movement.h"
 #include <iostream>
+#include <random>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -10,6 +11,31 @@ using namespace std;
 
 const int length = 100;
 const int width = 100;
+
+static std::random_device rd;
+static std::mt19937 engine(rd());
+
+int randomYvalue(){
+    return std::uniform_int_distribution<int>(2, 13)(engine);
+}
+
+
+// this function will print an enemy(X) 20% of the time.
+// and will run continually until there are numberOfEnemies enemies
+void trySpawn(int numberOfEnemies){
+    int enemyCounter = 0;
+    while(enemyCounter < numberOfEnemies)
+    {
+        int currentRandom = std::uniform_int_distribution<int>(0, 100)(engine);
+        if(currentRandom <= 20)
+        {
+            setCursorPos(99, randomYvalue());
+            std::cout << enemyIcon;
+            enemyCounter++;
+        }
+    }
+}
+
 
 // Sets cursor position for drawing elements
 void setCursorPos(int x, int y){
@@ -83,4 +109,10 @@ void render(){
     setCursorPos(playerX, playerY);
     std::cout << playerIcon;
     setCursorPos(0, 16);
+
+}
+
+void renderEnemy(){
+    trySpawn(4);
+    
 }

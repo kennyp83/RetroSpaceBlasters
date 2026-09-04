@@ -6,6 +6,7 @@ extern int playerY;
 extern int prevPlayerX;
 extern int prevPlayerY;
 extern char playerIcon;
+extern char enemyIcon;
 
 extern int playerDX;
 extern int playerDY;

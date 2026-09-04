@@ -33,5 +33,6 @@ bool setup()
     hideCursor();
     gameOver = false;
     renderBorder(100, 15);
+    renderEnemy();
     return true;
 }
