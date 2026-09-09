@@ -1,6 +1,9 @@
 #pragma once
 #include "input.h"
 
+
+static int minX{1}, maxX{99}, minY{1}, maxY{13};
+
 extern int playerX;
 extern int playerY;
 extern int prevPlayerX;

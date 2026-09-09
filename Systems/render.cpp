@@ -2,6 +2,9 @@
 #include "movement.h"
 #include <iostream>
 #include <random>
+#include <vector>
+#include <chrono>
+#include <thread>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -20,20 +23,52 @@ int randomYvalue(){
 }
 
 
+void startEnemyMovement(std::vector<int>& YPositionArray, int enemyCount, int enemyX)
+{
+    while(enemyX > maxX/2)
+    {
+         for(int i = 0; i < enemyCount; i++)
+         {
+             int prevEnemyX = enemyX;
+             enemyX--;
+            //remove old enemy icon
+            setCursorPos(prevEnemyX, YPositionArray[i]);
+            std::cout << ' ';
+            //create new enemy
+            setCursorPos(enemyX, YPositionArray[i]);
+            std::cout << enemyIcon;
+         }
+         movePlayer();
+         std::this_thread::sleep_for(std::chrono::seconds(2));
+    }
+}
+
 // this function will print an enemy(X) 20% of the time.
 // and will run continually until there are numberOfEnemies enemies
-void trySpawn(int numberOfEnemies){
-    int enemyCounter = 0;
+// then starts enemyMovement with startEnemyMovement
+void startSpawn(int numberOfEnemies)
+{
+
+    int enemyCounter{0}, enemyYPosition{0};
+    std::vector<int> enemyYvalues(numberOfEnemies);
+
     while(enemyCounter < numberOfEnemies)
     {
         int currentRandom = std::uniform_int_distribution<int>(0, 100)(engine);
         if(currentRandom <= 20)
         {
-            setCursorPos(99, randomYvalue());
+            int enemyY = randomYvalue();
+            //Enemy Printing
+            setCursorPos(maxX, enemyY);
             std::cout << enemyIcon;
+            //add enemyY to Y value array
+            enemyYvalues[enemyCounter] = enemyY;
             enemyCounter++;
         }
     }
+
+    startEnemyMovement(enemyYvalues, numberOfEnemies, maxX);
+
 }
 
 
@@ -110,9 +145,12 @@ void render(){
     std::cout << playerIcon;
     setCursorPos(0, 16);
 
+    movePlayer();
+    renderEnemy();
+
+
 }
 
 void renderEnemy(){
-    trySpawn(4);
-    
+    startSpawn(4);
 }

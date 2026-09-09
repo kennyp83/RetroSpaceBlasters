@@ -7,32 +7,37 @@
 
 using namespace std;
 
-void gotoXY(int x, int y);
-void gotoXY(int x, int y, string text);
+void gotoXY(int x, int y), gotoXY(int X, int Y, string text);
 
-int playerX = 50;
-int playerY = 7;
-int prevPlayerX = 50;
-int prevPlayerY = 7;
-char playerIcon = '>';
-char enemyIcon = 'X';
+//icons
 
-int playerDX = 1;
-int playerDY = 0;
+char playerIcon{'>'}, enemyIcon{'X'};
+
+// Here lies Bullet inilization
 
 bool bulletActive = false;
-int bulletX = 0;
-int bulletY = 0;
-int bulletPrevX = 0;
-int bulletPrevY = 0;
-int bulletDX = 0;
-int bulletDY = 0;
-int bulletSpeed = .25;
 
-static const int minX = 1;
-static const int maxX = 99;
-static const int minY = 1;
-static const int maxY = 13;
+int bulletX{0}, 
+    bulletY{0}, 
+    bulletPrevX{0}, 
+    bulletPrevY{0}, 
+    bulletDX{0}, 
+    bulletDY{0},
+    prevPlayerX{50},
+    prevPlayerY{7},
+    playerDX{1},
+    playerDY{0};
+
+double bulletSpeed{.25};
+//---------------------------
+
+
+//Player spawn
+int playerX = maxX/4;
+int playerY = maxY/2;
+int prevPlayerx = playerX;
+int prevPlayery = playerY;
+//--------------------------
 
 void movePlayer()
 {
@@ -64,6 +69,7 @@ void movePlayer()
     if (playerX > maxX) playerX = maxX;
     if (playerY < minY) playerY = minY;
     if (playerY > maxY) playerY = maxY;
+
 }
 
 void fireBullet()
@@ -102,4 +108,13 @@ void fireBullet()
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
     bulletActive = false;
+}
+
+void startEnemies(){
+    int enemyMaxDistance = 20;
+    for (int i= 0; i<= enemyMaxDistance; i++)
+    {
+
+    }
+    
 }
