@@ -10,6 +10,9 @@
 #include <windows.h>
 #endif
 
+
+bool 
+
 using namespace std;
 
 const int length = 100;
@@ -18,16 +21,32 @@ const int width = 100;
 static std::random_device rd;
 static std::mt19937 engine(rd());
 
+
+//number of enemies to be spawned
+int targetEnemyCount = 4;
+//number of enemies currently spawned
+int enemyCounter = 0;
+bool allEnemiesSpawned = false;
+// false if enemy corrispoding to that element is dead
+bool enemyActivity[enemyCount] = {false, false, false false};
+// all enemy positions are stored here
+// [0][] = x, [1][] = y
+int enemyXY[2][enemyCount];
+
 int randomYvalue(){
     return std::uniform_int_distribution<int>(2, 13)(engine);
 }
 
 
-void startEnemyMovement(std::vector<int>& YPositionArray, int enemyCount, int enemyX)
+//If all enemies are active, this will move them forward once.
+//to be called once per frame
+//updates until enemies reach their max point
+void updateEnemeis(std::vector<int>& YPositionArray, int enemyCount, int enemyX)
 {
-    while(enemyX > maxX/2)
+    //fix line below
+    if(allEnemiesSpawned)
     {
-         for(int i = 0; i < enemyCount; i++)
+         for(int i = 0; i < targetEnemyCount; i++)
          {
              int prevEnemyX = enemyX;
              enemyX--;
@@ -43,32 +62,28 @@ void startEnemyMovement(std::vector<int>& YPositionArray, int enemyCount, int en
     }
 }
 
-// this function will print an enemy(X) 20% of the time.
-// and will run continually until there are numberOfEnemies enemies
-// then starts enemyMovement with startEnemyMovement
-void startSpawn(int numberOfEnemies)
+//Once at the start of a round, enemies will be spawned at a random y pos
+//xy of enemies are stored as well as their status.
+//called once then will pass every frame.
+void initiateEnemySpawn(int numberOfEnemies)
 {
-
-    int enemyCounter{0}, enemyYPosition{0};
-    std::vector<int> enemyYvalues(numberOfEnemies);
-
-    while(enemyCounter < numberOfEnemies)
+    if(!allEnemiesSpawned)
     {
-        int currentRandom = std::uniform_int_distribution<int>(0, 100)(engine);
-        if(currentRandom <= 20)
+        int enemyY = randomYvalue();
+        //Enemy Printing
+        setCursorPos(maxX, enemyY);
+        std::cout << enemyIcon;
+        //add enemyY to Y value array
+        enemyXY[1][enemyCounter] = enemyY;
+        enemyXY[0][enemyCounter] = maxX; // all enemies start at maxX
+        //set enemy to active
+        enemyActivity[enemyCounter] = true;
+        enemyCounter++;
+        if(enemyCounter = targetEnemyCount)
         {
-            int enemyY = randomYvalue();
-            //Enemy Printing
-            setCursorPos(maxX, enemyY);
-            std::cout << enemyIcon;
-            //add enemyY to Y value array
-            enemyYvalues[enemyCounter] = enemyY;
-            enemyCounter++;
+            allEnemiesSpawned = true;
         }
     }
-
-    startEnemyMovement(enemyYvalues, numberOfEnemies, maxX);
-
 }
 
 
@@ -151,6 +166,7 @@ void render(){
 
 }
 
+//tofix
 void renderEnemy(){
     startSpawn(4);
 }
