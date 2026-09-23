@@ -10,85 +10,81 @@
 #include <windows.h>
 #endif
 
-
-bool 
-
-using namespace std;
-
-const int length = 100;
-const int width = 100;
+// Number of enemies to spawn per round.
+static const int targetEnemyCount = 4;
+// Number of enemies currently spawned.
+static int enemyCounter = 0;
+static bool allEnemiesSpawned = false;
+// false if the enemy corresponding to that element is dead.
+static bool enemyActivity[targetEnemyCount] = {false, false, false, false};
+// All enemy positions are stored here: [0][] = x, [1][] = y.
+static int enemyXY[2][targetEnemyCount];
 
 static std::random_device rd;
 static std::mt19937 engine(rd());
 
-
-//number of enemies to be spawned
-int targetEnemyCount = 4;
-//number of enemies currently spawned
-int enemyCounter = 0;
-bool allEnemiesSpawned = false;
-// false if enemy corrispoding to that element is dead
-bool enemyActivity[enemyCount] = {false, false, false false};
-// all enemy positions are stored here
-// [0][] = x, [1][] = y
-int enemyXY[2][enemyCount];
-
-int randomYvalue(){
+static int randomYvalue()
+{
     return std::uniform_int_distribution<int>(2, 13)(engine);
 }
 
-
-//If all enemies are active, this will move them forward once.
-//to be called once per frame
-//updates until enemies reach their max point
-void updateEnemeis(std::vector<int>& YPositionArray, int enemyCount, int enemyX)
+// If all enemies are active, this will move them forward once.
+// Called once per frame; updates until enemies reach their max point.
+static void updateEnemies(std::vector<int>& yPositions, int enemyX)
 {
-    //fix line below
-    if(allEnemiesSpawned)
+    if (!allEnemiesSpawned)
     {
-         for(int i = 0; i < targetEnemyCount; i++)
-         {
-             int prevEnemyX = enemyX;
-             enemyX--;
-            //remove old enemy icon
-            setCursorPos(prevEnemyX, YPositionArray[i]);
-            std::cout << ' ';
-            //create new enemy
-            setCursorPos(enemyX, YPositionArray[i]);
-            std::cout << enemyIcon;
-         }
-         movePlayer();
-         std::this_thread::sleep_for(std::chrono::seconds(2));
+        return;
     }
-}
 
-//Once at the start of a round, enemies will be spawned at a random y pos
-//xy of enemies are stored as well as their status.
-//called once then will pass every frame.
-void initiateEnemySpawn(int numberOfEnemies)
-{
-    if(!allEnemiesSpawned)
+    for (int i = 0; i < targetEnemyCount; i++)
     {
-        int enemyY = randomYvalue();
-        //Enemy Printing
-        setCursorPos(maxX, enemyY);
+        int prevEnemyX = enemyX;
+        enemyX--;
+
+        // Remove old enemy icon.
+        setCursorPos(prevEnemyX, yPositions[i]);
+        std::cout << ' ';
+        // Draw enemy at its new position.
+        setCursorPos(enemyX, yPositions[i]);
         std::cout << enemyIcon;
-        //add enemyY to Y value array
-        enemyXY[1][enemyCounter] = enemyY;
-        enemyXY[0][enemyCounter] = maxX; // all enemies start at maxX
-        //set enemy to active
-        enemyActivity[enemyCounter] = true;
-        enemyCounter++;
-        if(enemyCounter = targetEnemyCount)
-        {
-            allEnemiesSpawned = true;
-        }
+    }
+    movePlayer();
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+}
+
+// Once at the start of a round, enemies are spawned at a random y position.
+// The xy position of each enemy is stored along with its active status.
+// Called once per frame until all enemies have been spawned.
+static void initiateEnemySpawn(int numberOfEnemies)
+{
+    (void)numberOfEnemies;
+
+    if (allEnemiesSpawned)
+    {
+        return;
+    }
+
+    int enemyY = randomYvalue();
+
+    setCursorPos(maxX, enemyY);
+    std::cout << enemyIcon;
+
+    enemyXY[0][enemyCounter] = maxX; // All enemies start at maxX.
+    enemyXY[1][enemyCounter] = enemyY;
+    enemyActivity[enemyCounter] = true;
+    enemyCounter++;
+
+    if (enemyCounter == targetEnemyCount)
+    {
+        allEnemiesSpawned = true;
     }
 }
 
 
-// Sets cursor position for drawing elements
-void setCursorPos(int x, int y){
+// Sets cursor position for drawing elements.
+void setCursorPos(int x, int y)
+{
 #ifdef _WIN32
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     COORD pos = {(short)x, (short)y};
@@ -98,14 +94,18 @@ void setCursorPos(int x, int y){
 #endif
 }
 
-void setColor(int colorCode){
+static void setColor(int colorCode)
+{
 #ifdef _WIN32
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hConsole, colorCode);
 #else
-    if (colorCode == 11) {
+    if (colorCode == 11)
+    {
         std::cout << "\033[36m";
-    } else {
+    }
+    else
+    {
         std::cout << "\033[0m";
     }
 #endif
@@ -113,45 +113,48 @@ void setColor(int colorCode){
 
 void renderBorder(int width, int height)
 {
-    // 11 = cyan
+    // 11 = cyan.
     setColor(11);
 
-    // Draw top/bottom borders
-    for (int x = 1; x < width; ++x){
-        //top
+    // Draw top/bottom borders.
+    for (int x = 1; x < width; ++x)
+    {
         setCursorPos(x, 0);
         std::cout << '_';
-        //bottom
         setCursorPos(x, height - 1);
         std::cout << '_';
     }
 
-    // Draw left/right borders
-    for (int y = 0; y < height - 1; ++y){
-        //left
+    // Draw left/right borders.
+    for (int y = 0; y < height - 1; ++y)
+    {
         setCursorPos(0, y + 1);
         std::cout << '|';
-        //right
         setCursorPos(width, y + 1);
         std::cout << '|';
     }
     setColor(7);
 }
 
-void render(){
-    if (prevPlayerX != playerX || prevPlayerY != playerY) {
+void render()
+{
+    if (prevPlayerX != playerX || prevPlayerY != playerY)
+    {
         setCursorPos(prevPlayerX, prevPlayerY);
         std::cout << ' ';
     }
 
-    if (bulletPrevX != bulletX || bulletPrevY != bulletY) {
-        if (bulletPrevX >= 1 && bulletPrevX <= 99 && bulletPrevY >= 1 && bulletPrevY <= 13) {
+    if (bulletPrevX != bulletX || bulletPrevY != bulletY)
+    {
+        if (bulletPrevX >= 1 && bulletPrevX <= 99 && bulletPrevY >= 1 && bulletPrevY <= 13)
+        {
             setCursorPos(bulletPrevX, bulletPrevY);
             std::cout << ' ';
         }
     }
 
-    if (bulletActive) {
+    if (bulletActive)
+    {
         setCursorPos(bulletX, bulletY);
         std::cout << '*';
     }
@@ -162,11 +165,18 @@ void render(){
 
     movePlayer();
     renderEnemy();
-
-
 }
 
-//tofix
-void renderEnemy(){
-    startSpawn(4);
+void renderEnemy()
+{
+    static int currentEnemyX = maxX;
+
+    initiateEnemySpawn(targetEnemyCount);
+
+    if (allEnemiesSpawned)
+    {
+        std::vector<int> yPositions(enemyXY[1], enemyXY[1] + targetEnemyCount);
+        updateEnemies(yPositions, currentEnemyX);
+        currentEnemyX--;
+    }
 }

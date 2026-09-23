@@ -1,7 +1,7 @@
 #pragma once
 #include "input.h"
 
-
+// Playable area bounds.
 static int minX{1}, maxX{99}, minY{1}, maxY{13};
 
 extern int playerX;
