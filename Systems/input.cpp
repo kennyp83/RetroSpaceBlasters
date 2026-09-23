@@ -15,45 +15,47 @@ static bool rawInputEnabled = false;
 
 void disableRawInput()
 {
-	if(!rawInputEnabled){
-		return;
-	}
+    if (!rawInputEnabled)
+    {
+        return;
+    }
 
-	tcsetattr(STDIN_FILENO, TCSANOW, &originalTerminalSettings);
+    tcsetattr(STDIN_FILENO, TCSANOW, &originalTerminalSettings);
     fcntl(STDIN_FILENO, F_SETFL, originalInputFlags);
-	rawInputEnabled = false;
-
+    rawInputEnabled = false;
 }
+
 void enableRawInput()
 {
-	if(rawInputEnabled){
-		return;
-	}
+    if (rawInputEnabled)
+    {
+        return;
+    }
 
-	tcgetattr(STDIN_FILENO, &originalTerminalSettings);
+    tcgetattr(STDIN_FILENO, &originalTerminalSettings);
 
-	termios rawSettings = originalTerminalSettings;
-	rawSettings.c_lflag &= ~(ICANON | ECHO);
-	rawSettings.c_cc[VMIN] = 0;
-	rawSettings.c_cc[VTIME] = 0;
+    termios rawSettings = originalTerminalSettings;
+    rawSettings.c_lflag &= ~(ICANON | ECHO);
+    rawSettings.c_cc[VMIN] = 0;
+    rawSettings.c_cc[VTIME] = 0;
 
-	tcsetattr(STDIN_FILENO, TCSANOW, &rawSettings);
+    tcsetattr(STDIN_FILENO, TCSANOW, &rawSettings);
 
-	originalInputFlags = fcntl(STDIN_FILENO, F_GETFL, 0);
-	fcntl(STDIN_FILENO, F_SETFL, originalInputFlags | O_NONBLOCK);
+    originalInputFlags = fcntl(STDIN_FILENO, F_GETFL, 0);
+    fcntl(STDIN_FILENO, F_SETFL, originalInputFlags | O_NONBLOCK);
 
-	rawInputEnabled = true;
-	std::atexit(disableRawInput);
-
-	
+    rawInputEnabled = true;
+    std::atexit(disableRawInput);
 }
 
-static char getCharNonBlocking() {
-	char character = 0;
-	if (read(STDIN_FILENO, &character, 1) != 1){
-		return 0;
- }
-	return character;
+static char getCharNonBlocking()
+{
+    char character = 0;
+    if (read(STDIN_FILENO, &character, 1) != 1)
+    {
+        return 0;
+    }
+    return character;
 }
 #endif
 

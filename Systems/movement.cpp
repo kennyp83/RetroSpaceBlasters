@@ -1,43 +1,29 @@
-#include <iostream>
 #include "movement.h"
-#include <thread>
-#include <chrono>
-#include <string>
 #include "render.h"
+#include <chrono>
+#include <iostream>
+#include <thread>
 
-using namespace std;
+// Icons.
+char playerIcon{'>'};
+char enemyIcon{'X'};
 
-void gotoXY(int x, int y), gotoXY(int X, int Y, string text);
-
-//icons
-
-char playerIcon{'>'}, enemyIcon{'X'};
-
-// Here lies Bullet inilization
-
+// Bullet state.
 bool bulletActive = false;
+int bulletX{0};
+int bulletY{0};
+int bulletPrevX{0};
+int bulletPrevY{0};
+int bulletDX{0};
+int bulletDY{0};
 
-int bulletX{0}, 
-    bulletY{0}, 
-    bulletPrevX{0}, 
-    bulletPrevY{0}, 
-    bulletDX{0}, 
-    bulletDY{0},
-    prevPlayerX{50},
-    prevPlayerY{7},
-    playerDX{1},
-    playerDY{0};
-
-double bulletSpeed{.25};
-//---------------------------
-
-
-//Player spawn
-int playerX = maxX/4;
-int playerY = maxY/2;
-int prevPlayerx = playerX;
-int prevPlayery = playerY;
-//--------------------------
+// Player state.
+int prevPlayerX{50};
+int prevPlayerY{7};
+int playerDX{1};
+int playerDY{0};
+int playerX = maxX / 4;
+int playerY = maxY / 2;
 
 void movePlayer()
 {
@@ -56,7 +42,7 @@ void movePlayer()
     {
         playerX--;
     }
-    if (inputState.right && playerX < maxX/4)
+    if (inputState.right && playerX < maxX / 4)
     {
         playerX++;
     }
@@ -69,28 +55,29 @@ void movePlayer()
     if (playerX > maxX) playerX = maxX;
     if (playerY < minY) playerY = minY;
     if (playerY > maxY) playerY = maxY;
-
 }
 
 void fireBullet()
 {
-    if(bulletActive){
+    if (bulletActive)
+    {
         return;
     }
-    std::cout << "\a" << std::flush;
+
     bulletActive = true;
-    int bulletDistance = 10;
     std::cout << "\a" << std::flush;
+
+    const int bulletDistance = 10;
     for (int i = 0; i <= bulletDistance; i++)
     {
-        if(((playerX + playerDX * i) >= maxX) || (playerY + playerDY * i) >= maxY){
+        if ((playerX + playerDX * i) >= maxX || (playerY + playerDY * i) >= maxY)
+        {
             bulletActive = false;
             return;
         }
 
         bulletPrevX = bulletX;
         bulletPrevY = bulletY;
-
 
         bulletX = playerX + playerDX * i;
         bulletY = playerY + playerDY * i;
@@ -108,13 +95,4 @@ void fireBullet()
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
     bulletActive = false;
-}
-
-void startEnemies(){
-    int enemyMaxDistance = 20;
-    for (int i= 0; i<= enemyMaxDistance; i++)
-    {
-
-    }
-    
 }
