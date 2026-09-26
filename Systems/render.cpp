@@ -17,6 +17,8 @@ static int enemyCounter = 0;
 static bool allEnemiesSpawned = false;
 // false if the enemy corresponding to that element is dead.
 static bool enemyActivity[targetEnemyCount] = {false, false, false, false};
+// Counter for enemies that make it to the player's side
+static int enemiesReachedCount = 0;
 // All enemy positions are stored here: [0][] = x, [1][] = y.
 static int enemyXY[2][targetEnemyCount];
 
@@ -36,21 +38,33 @@ static void updateEnemies(std::vector<int>& yPositions, int enemyX)
     {
         return;
     }
-
     for (int i = 0; i < targetEnemyCount; i++)
     {
-        int prevEnemyX = enemyX;
-        enemyX--;
+        if(!enemyActivity[i])
+        {
+            continue;
+        }
 
-        // Remove old enemy icon.
+        int prevEnemyX = enemyXY[0][i];
+        int newEnemyX = prevEnemyX - 1;
+
+        //clear old icon
         setCursorPos(prevEnemyX, yPositions[i]);
         std::cout << ' ';
-        // Draw enemy at its new position.
-        setCursorPos(enemyX, yPositions[i]);
+
+        if (newEnemyX <= maxX / 4)
+        {
+            // Enemy reached the player's line: remove and count it.
+            enemyActivity[i] = false;
+            enemiesReachedCount++;
+            continue;
+        }
+
+        enemyXY[0][i] = newEnemyX;
+        setCursorPos(newEnemyX, yPositions[i]);
         std::cout << enemyIcon;
     }
     movePlayer();
-    std::this_thread::sleep_for(std::chrono::seconds(2));
 }
 
 // Once at the start of a round, enemies are spawned at a random y position.
@@ -165,18 +179,23 @@ void render()
 
     movePlayer();
     renderEnemy();
+
+    setCursorPos(0, 16);
+    std::cout << "Enemies through: " << getEnemiesReachedCount() << ' ';
+}
+
+int getEnemiesReachedCount()
+{
+    return enemiesReachedCount;
 }
 
 void renderEnemy()
 {
-    static int currentEnemyX = maxX;
-
     initiateEnemySpawn(targetEnemyCount);
 
     if (allEnemiesSpawned)
     {
         std::vector<int> yPositions(enemyXY[1], enemyXY[1] + targetEnemyCount);
-        updateEnemies(yPositions, currentEnemyX);
-        currentEnemyX--;
+        updateEnemies(yPositions, 0);
     }
 }
