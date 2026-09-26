@@ -178,6 +178,7 @@ void render()
     setCursorPos(0, 16);
 
     movePlayer();
+    updateBullet();
     renderEnemy();
 
     setCursorPos(0, 16);
