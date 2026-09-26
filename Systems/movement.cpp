@@ -57,7 +57,6 @@ void movePlayer()
     if (playerY < minY) playerY = minY;
     if (playerY > maxY) playerY = maxY;
 }
-
 void fireBullet()
 {
     if (bulletActive)
@@ -68,41 +67,42 @@ void fireBullet()
     bulletActive = true;
     std::cout << "\a" << std::flush;
 
-    const int bulletDistance = maxX - playerX;
+    bulletPrevX = bulletX;
+    bulletPrevY = bulletY;
+    bulletX = playerX;
+    bulletY = playerY;
+}
 
-    for (int i = 0; i <= bulletDistance; i++)
+void updateBullet()
+{
+    if (!bulletActive)
     {
-        if ((playerX + playerDX * i) >= maxX || (playerY + playerDY * i) >= maxY)
-        {
-            bulletActive = false;
-            return;
-        }
-
-        bulletPrevX = bulletX;
-        bulletPrevY = bulletY;
-
-        bulletX = playerX + playerDX * i;
-        bulletY = playerY + playerDY * i;
-
-        if (bulletPrevX != bulletX || bulletPrevY != bulletY)
-        {
-            if (bulletPrevX >= 1 && bulletPrevX <= 99 &&
-                bulletPrevY >= 1 && bulletPrevY <= 13)
-            {
-                setCursorPos(bulletPrevX, bulletPrevY);
-                std::cout << ' ';
-            }
-        }
-        if (tryHitEnemyAt(bulletX, bulletY))
-        {
-            playerScore++;
-            setCursorPos(bulletX, bulletY);
-            std::cout << ' ';
-            bulletActive = false;
-            return;
-        }
-        render();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        return;
     }
-    bulletActive = false;
+
+    bulletPrevX = bulletX;
+    bulletPrevY = bulletY;
+
+    int newBulletX = bulletX + playerDX;
+    int newBulletY = bulletY + playerDY;
+
+    if (newBulletX >= maxX || newBulletY >= maxY)
+    {
+        setCursorPos(bulletX, bulletY);
+        std::cout << ' ';
+        bulletActive = false;
+        return;
+    }
+
+    if (tryHitEnemyAt(newBulletX, newBulletY))
+    {
+        setCursorPos(bulletX, bulletY);
+        std::cout << ' ';
+        playerScore++;
+        bulletActive = false;
+        return;
+    }
+
+    bulletX = newBulletX;
+    bulletY = newBulletY;
 }
