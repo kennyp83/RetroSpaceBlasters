@@ -17,6 +17,10 @@ static int enemyCounter = 0;
 static bool allEnemiesSpawned = false;
 // false if the enemy corresponding to that element is dead.
 static bool enemyActivity[targetEnemyCount] = {false, false, false, false};
+// Frames remaining before this enemies takes it's next step
+static int enemyMoveTimer[targetEnemyCount] = {0, 0, 0, 0};
+// Frames between moves for this enemy; lower = faster
+static int enemySpeed[targetEnemyCount] = {4, 4, 4, 4};
 // Counter for enemies that make it to the player's side
 static int enemiesReachedCount = 0;
 // All enemy positions are stored here: [0][] = x, [1][] = y.
@@ -44,6 +48,13 @@ static void updateEnemies(std::vector<int>& yPositions, int enemyX)
         {
             continue;
         }
+
+        enemyMoveTimer[i]--;
+        if (enemyMoveTimer[i] > 0)
+        {
+            continue; // not this enemies turn to move
+        }
+        enemyMoveTimer[i] = enemySpeed[i];
 
         int prevEnemyX = enemyXY[0][i];
         int newEnemyX = prevEnemyX - 1;
@@ -92,6 +103,12 @@ static void initiateEnemySpawn(int numberOfEnemies)
     if (enemyCounter == targetEnemyCount)
     {
         allEnemiesSpawned = true;
+        enemyXY[0][enemyCounter] = maxX;
+        enemyXY[1][enemyCounter] = enemyY;
+        enemyActivity[enemyCounter] = true;
+        enemySpeed[enemyCounter] = std::uniform_int_distribution<int>(2, 5)(engine);
+        enemyMoveTimer[enemyCounter] = enemySpeed[enemyCounter];
+        enemyCounter++;
     }
 }
 
