@@ -24,6 +24,7 @@ int playerDX{1};
 int playerDY{0};
 int playerX = maxX / 4;
 int playerY = maxY / 2;
+int playerScore = 0;
 
 void movePlayer()
 {
@@ -67,7 +68,8 @@ void fireBullet()
     bulletActive = true;
     std::cout << "\a" << std::flush;
 
-    const int bulletDistance = 10;
+    const int bulletDistance = maxX - playerX;
+
     for (int i = 0; i <= bulletDistance; i++)
     {
         if ((playerX + playerDX * i) >= maxX || (playerY + playerDY * i) >= maxY)
@@ -90,6 +92,14 @@ void fireBullet()
                 setCursorPos(bulletPrevX, bulletPrevY);
                 std::cout << ' ';
             }
+        }
+        if (tryHitEnemyAt(bulletX, bulletY))
+        {
+            playerScore++;
+            setCursorPos(bulletX, bulletY);
+            std::cout << ' ';
+            bulletActive = false;
+            return;
         }
         render();
         std::this_thread::sleep_for(std::chrono::milliseconds(50));

@@ -54,9 +54,10 @@ static void updateEnemies(std::vector<int>& yPositions, int enemyX)
 
         if (newEnemyX <= maxX / 4)
         {
-            // Enemy reached the player's line: remove and count it.
-            enemyActivity[i] = false;
+            // Enemy reached the player's line: count it and reset the enemy
             enemiesReachedCount++;
+            enemyXY[0][i] = maxX;
+            enemyXY[1][i] = randomYvalue();
             continue;
         }
 
@@ -64,7 +65,6 @@ static void updateEnemies(std::vector<int>& yPositions, int enemyX)
         setCursorPos(newEnemyX, yPositions[i]);
         std::cout << enemyIcon;
     }
-    movePlayer();
 }
 
 // Once at the start of a round, enemies are spawned at a random y position.
@@ -181,7 +181,23 @@ void render()
     renderEnemy();
 
     setCursorPos(0, 16);
-    std::cout << "Enemies through: " << getEnemiesReachedCount() << ' ';
+    std::cout << "Enemies through: " << getEnemiesReachedCount()
+        << " Score: " << playerScore << ' ';
+}
+
+bool tryHitEnemyAt(int x, int y)
+{
+    for (int i = 0; i < targetEnemyCount; i++)
+    {
+        if (enemyActivity[i] && enemyXY[0][i] == x && enemyXY[1][i] == y)
+        {
+            enemyActivity[i] = false;
+            setCursorPos(x, y);
+            std::cout << ' ';
+            return true;
+        }
+    }
+    return false;
 }
 
 int getEnemiesReachedCount()
