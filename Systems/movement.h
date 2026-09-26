@@ -11,6 +11,7 @@ extern int prevPlayerY;
 extern char playerIcon;
 extern char enemyIcon;
 extern int playerScore;
+extern int playerHealth;
 
 extern int playerDX;
 extern int playerDY;

@@ -25,6 +25,7 @@ int playerDY{0};
 int playerX = maxX / 4;
 int playerY = maxY / 2;
 int playerScore = 0;
+int playerHealth = 100;
 
 void movePlayer()
 {

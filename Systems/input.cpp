@@ -1,4 +1,5 @@
 #include "input.h"
+#include "setup.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -74,6 +75,11 @@ void input() {
     bool currentLeft = (GetAsyncKeyState('A') & 0x8000) || (GetAsyncKeyState(VK_LEFT) & 0x8000);
     bool currentRight = (GetAsyncKeyState('D') & 0x8000) || (GetAsyncKeyState(VK_RIGHT) & 0x8000);
     bool currentShoot = (GetAsyncKeyState(VK_SPACE) & 0x8000);
+    bool currentEscape = (GetAsyncKeyState(VK_ESCAPE) & 0x8000);
+    if (currentEscape)
+    {
+        gameOver = true;
+    }
 #else
     char c = getCharNonBlocking();
     bool currentUp = (c == 'w' || c == 'W');
@@ -84,16 +90,18 @@ void input() {
 
     if (c == '\033') {
         char seq[2];
-        if (read(STDIN_FILENO, &seq[0], 1) > 0 && read(STDIN_FILENO, &seq[1], 1) > 0) {
-            if (seq[0] == '[') {
-                switch (seq[1]) {
-                    case 'A': currentUp = true; break;
-                    case 'B': currentDown = true; break;
-                    case 'D': currentLeft = true; break;
-                    case 'C': currentRight = true; break;
-                }
+        bool gotSeq = read(STDIN_FILENO, &seq[0], 1) > 0 && read(STDIN_FILENO, &seq[1], 1) > 0;
+        if (seq[0] == '[') {
+            switch (seq[1]) {
+                case 'A': currentUp = true; break;
+                case 'B': currentDown = true; break;
+                case 'D': currentLeft = true; break;
+                case 'C': currentRight = true; break;
+             }
+            } else if (!gotSeq) {
+                gameOver = true;
             }
-        }
+        
     }
 #endif
 

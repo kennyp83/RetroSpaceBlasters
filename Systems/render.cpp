@@ -5,6 +5,7 @@
 #include <vector>
 #include <chrono>
 #include <thread>
+#include "setup.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -17,10 +18,12 @@ static int enemyCounter = 0;
 static bool allEnemiesSpawned = false;
 // false if the enemy corresponding to that element is dead.
 static bool enemyActivity[targetEnemyCount] = {false, false, false, false};
-// Frames remaining before this enemies takes it's next step
-static int enemyMoveTimer[targetEnemyCount] = {0, 0, 0, 0};
 // Frames between moves for this enemy; lower = faster
-static int enemySpeed[targetEnemyCount] = {4, 4, 4, 4};
+static int enemySpeed[targetEnemyCount] = {6, 6, 6, 6};
+// Frames between enemy moves; smaller = faster. Raps down after every wave
+static int enemyMoveInterval = 8;
+static int enemyMoveTimer = 0;
+static const int minEnemyMoveInterval = 2;
 // Counter for enemies that make it to the player's side
 static int enemiesReachedCount = 0;
 // All enemy positions are stored here: [0][] = x, [1][] = y.
@@ -42,19 +45,17 @@ static void updateEnemies(std::vector<int>& yPositions, int enemyX)
     {
         return;
     }
+
+    enemyMoveTimer = 0;
+
+    bool anyAlive = false;
     for (int i = 0; i < targetEnemyCount; i++)
     {
         if(!enemyActivity[i])
         {
             continue;
         }
-
-        enemyMoveTimer[i]--;
-        if (enemyMoveTimer[i] > 0)
-        {
-            continue; // not this enemies turn to move
-        }
-        enemyMoveTimer[i] = enemySpeed[i];
+        anyAlive = true;
 
         int prevEnemyX = enemyXY[0][i];
         int newEnemyX = prevEnemyX - 1;
@@ -67,6 +68,12 @@ static void updateEnemies(std::vector<int>& yPositions, int enemyX)
         {
             // Enemy reached the player's line: count it and reset the enemy
             enemiesReachedCount++;
+            playerHealth -= 10;
+            if (playerHealth <= 0)
+            {
+                playerHealth = 0;
+                gameOver = true;
+            }
             enemyXY[0][i] = maxX;
             enemyXY[1][i] = randomYvalue();
             continue;
@@ -75,6 +82,16 @@ static void updateEnemies(std::vector<int>& yPositions, int enemyX)
         enemyXY[0][i] = newEnemyX;
         setCursorPos(newEnemyX, yPositions[i]);
         std::cout << enemyIcon;
+    }
+    if (!anyAlive)
+    {
+        // Wave cleared: speed up the next wave; renderEnemy() will spawn it
+        if (enemyMoveInterval > minEnemyMoveInterval)
+        {
+            enemyMoveInterval--;
+        }
+        enemyCounter = 0;
+        allEnemiesSpawned = false;
     }
 }
 
@@ -94,8 +111,8 @@ static void initiateEnemySpawn(int numberOfEnemies)
 
     setCursorPos(maxX, enemyY);
     std::cout << enemyIcon;
-
-    enemyXY[0][enemyCounter] = maxX; // All enemies start at maxX.
+    
+    enemyXY[0][enemyCounter] = maxX;
     enemyXY[1][enemyCounter] = enemyY;
     enemyActivity[enemyCounter] = true;
     enemyCounter++;
@@ -103,12 +120,6 @@ static void initiateEnemySpawn(int numberOfEnemies)
     if (enemyCounter == targetEnemyCount)
     {
         allEnemiesSpawned = true;
-        enemyXY[0][enemyCounter] = maxX;
-        enemyXY[1][enemyCounter] = enemyY;
-        enemyActivity[enemyCounter] = true;
-        enemySpeed[enemyCounter] = std::uniform_int_distribution<int>(2, 5)(engine);
-        enemyMoveTimer[enemyCounter] = enemySpeed[enemyCounter];
-        enemyCounter++;
     }
 }
 
@@ -200,7 +211,8 @@ void render()
 
     setCursorPos(0, 16);
     std::cout << "Enemies through: " << getEnemiesReachedCount()
-        << " Score: " << playerScore << ' ';
+        << " Score: " << playerScore
+        << " Health: " << playerHealth << ' ';
 }
 
 bool tryHitEnemyAt(int x, int y)
