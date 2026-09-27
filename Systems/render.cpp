@@ -18,9 +18,7 @@ static int enemyCounter = 0;
 static bool allEnemiesSpawned = false;
 // false if the enemy corresponding to that element is dead.
 static bool enemyActivity[targetEnemyCount] = {false, false, false, false};
-// Frames between moves for this enemy; lower = faster
-static int enemySpeed[targetEnemyCount] = {6, 6, 6, 6};
-// Frames between enemy moves; smaller = faster. Raps down after every wave
+// Frames between enemy moves; smaller = faster. Ramps down after every wave
 static int enemyMoveInterval = 8;
 static int enemyMoveTimer = 0;
 static const int minEnemyMoveInterval = 2;
@@ -46,6 +44,11 @@ static void updateEnemies(std::vector<int>& yPositions, int enemyX)
         return;
     }
 
+    enemyMoveTimer++;
+    if (enemyMoveTimer < enemyMoveInterval)
+    {
+        return;
+    }
     enemyMoveTimer = 0;
 
     bool anyAlive = false;
