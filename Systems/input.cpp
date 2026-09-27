@@ -49,14 +49,53 @@ void enableRawInput()
     std::atexit(disableRawInput);
 }
 
-static char getCharNonBlocking()
+struct RawInputBatch
 {
-    char character = 0;
-    if (read(STDIN_FILENO, &character, 1) != 1)
+    bool sawUp = false;
+    bool sawDown = false;
+    bool sawLeft = false;
+    bool sawRight = false;
+    bool sawShoot = false;
+    bool sawEscape = false;
+};
+
+// Drains every byte queued this frame so a burst of keystrokes can't be spread across frames.
+static RawInputBatch drainRawInput()
+{
+    RawInputBatch batch;
+    char c;
+    while (read(STDIN_FILENO, &c, 1) == 1)
     {
-        return 0;
+        switch (c)
+        {
+            case 'w': case 'W': batch.sawUp = true; break;
+            case 's': case 'S': batch.sawDown = true; break;
+            case 'a': case 'A': batch.sawLeft = true; break;
+            case 'd': case 'D': batch.sawRight = true; break;
+            case ' ': batch.sawShoot = true; break;
+            case '\033':
+            {
+                char seq[2];
+                bool gotSeq = read(STDIN_FILENO, &seq[0], 1) > 0 && read(STDIN_FILENO, &seq[1], 1) > 0;
+                if (gotSeq && seq[0] == '[')
+                {
+                    switch (seq[1])
+                    {
+                        case 'A': batch.sawUp = true; break;
+                        case 'B': batch.sawDown = true; break;
+                        case 'D': batch.sawLeft = true; break;
+                        case 'C': batch.sawRight = true; break;
+                    }
+                }
+                else if (!gotSeq)
+                {
+                    batch.sawEscape = true;
+                }
+                break;
+            }
+        }
     }
-    return character;
+    return batch;
 }
 #endif
 
@@ -66,7 +105,6 @@ static bool lastUp = false;
 static bool lastDown = false;
 static bool lastLeft = false;
 static bool lastRight = false;
-static bool lastShoot = false;
 
 void input() {
 #ifdef _WIN32
@@ -81,27 +119,15 @@ void input() {
         gameOver = true;
     }
 #else
-    char c = getCharNonBlocking();
-    bool currentUp = (c == 'w' || c == 'W');
-    bool currentDown = (c == 's' || c == 'S');
-    bool currentLeft = (c == 'a' || c == 'A');
-    bool currentRight = (c == 'd' || c == 'D');
-    bool currentShoot = (c == ' ');
-
-    if (c == '\033') {
-        char seq[2];
-        bool gotSeq = read(STDIN_FILENO, &seq[0], 1) > 0 && read(STDIN_FILENO, &seq[1], 1) > 0;
-        if (seq[0] == '[') {
-            switch (seq[1]) {
-                case 'A': currentUp = true; break;
-                case 'B': currentDown = true; break;
-                case 'D': currentLeft = true; break;
-                case 'C': currentRight = true; break;
-             }
-            } else if (!gotSeq) {
-                gameOver = true;
-            }
-        
+    RawInputBatch batch = drainRawInput();
+    bool currentUp = batch.sawUp;
+    bool currentDown = batch.sawDown;
+    bool currentLeft = batch.sawLeft;
+    bool currentRight = batch.sawRight;
+    bool currentShoot = batch.sawShoot;
+    if (batch.sawEscape)
+    {
+        gameOver = true;
     }
 #endif
 
@@ -109,11 +135,10 @@ void input() {
     inputState.down = currentDown && !lastDown;
     inputState.left = currentLeft && !lastLeft;
     inputState.right = currentRight && !lastRight;
-    inputState.shoot = currentShoot && !lastShoot;
+    inputState.shoot = currentShoot; // debounced by bulletActive in fireBullet(), not edge-detection
 
     lastUp = currentUp;
     lastDown = currentDown;
     lastLeft = currentLeft;
     lastRight = currentRight;
-    lastShoot = currentShoot;
 }

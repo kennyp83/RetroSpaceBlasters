@@ -16,6 +16,9 @@ int bulletPrevX{0};
 int bulletPrevY{0};
 int bulletDX{0};
 int bulletDY{0};
+// Safety net: force-clear a bullet that's been active far longer than it should ever take.
+static int bulletFramesAlive = 0;
+static const int maxBulletFramesAlive = 200;
 
 // Player state.
 int prevPlayerX{50};
@@ -66,6 +69,7 @@ void fireBullet()
     }
 
     bulletActive = true;
+    bulletFramesAlive = 0;
     std::cout << "\a" << std::flush;
 
     bulletPrevX = bulletX;
@@ -78,6 +82,15 @@ void updateBullet()
 {
     if (!bulletActive)
     {
+        return;
+    }
+
+    bulletFramesAlive++;
+    if (bulletFramesAlive > maxBulletFramesAlive)
+    {
+        setCursorPos(bulletX, bulletY);
+        std::cout << ' ';
+        bulletActive = false;
         return;
     }
 
