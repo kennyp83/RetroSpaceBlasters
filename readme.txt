@@ -10,11 +10,11 @@ Compile the code:
 |                                                                             |
 |     Make sure you are in the Retro Space Blasters Folder                    |
 |     Run:                                                                    |
-|          g++ -std=c++17 -Wall -Wextra -pedantic main.cpp Systems/* -o play  |
+|          g++ -std=c++17 -Wall -Wextra -pedantic main.cpp Systems/*.cpp -o play |
 |                                                                             |
  ------------------------------------------------------------------------------
 
-control + c to stop playing
+Esc to stop playing. Do not use control + c; it can leave the terminal raw.
 -------------------------------------------------------------------------------------------------
 
 

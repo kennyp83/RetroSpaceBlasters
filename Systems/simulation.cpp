@@ -1,6 +1,7 @@
 #include "simulation.h"
 
 #include <cstdint>
+#include <iostream>
 
 namespace {
 
@@ -104,6 +105,7 @@ void spawnBullet(EntityManager& world, int x, int y)
     world.add(bullet, Glyph{kBulletIcon, kColorText});
     world.add(bullet, Lifetime{0, kBulletMaxFrames});
     world.add(bullet, ScoreOnHit{kHitScore});
+    std::cout << '\a' << std::flush;
 }
 
 void tryFire(EntityManager& world, Entity player)
